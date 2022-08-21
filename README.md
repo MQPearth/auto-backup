@@ -10,5 +10,5 @@
 定时触发
 
 ```bash
-0 0 3 * * ? ./auto-backup -p /usr/local/xxx/data/
+0 0 3 * * ? auto-backup -p /usr/local/xxx/data/
 ```
