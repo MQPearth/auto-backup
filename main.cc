@@ -10,7 +10,6 @@
 #include "cos/response/object_resp.h"
 
 
-
 #define HELP_INFO "参数错误, 程序调用示例: \nauto-backup -p /usr/local/xxx/data/";
 
 /**
@@ -27,7 +26,7 @@ void verify_param(int argc, char **argv) noexcept(false);
  *
  * @param filename
  */
-void upload(std::string basicString) noexcept(false);
+void upload(char *cmd_path, std::string filename) noexcept(false);
 
 /**
  * 压缩文件
@@ -62,7 +61,7 @@ int main(int argc, char **argv) {
         }
         std::string filename = zip(argv[2]);
 
-        upload(filename);
+        upload(argv[0], filename);
 
         deleteReduceFile(filename);
 
@@ -127,13 +126,22 @@ std::string zip(char *path) {
 }
 
 
-void upload(std::string filename) {
-    std::string config_name = "./cos_config.json";
+void upload(char *_cmd_path, std::string filename) {
 
-    qcloud_cos::CosConfig config(config_name);
+    std::string cmd_path(_cmd_path);
+
+    std::stringstream config_path_ss;
+    config_path_ss << cmd_path.substr(0, cmd_path.find_last_of("/") + 1);
+    config_path_ss << "cos_config.json";
+
+    std::string config_path = config_path_ss.str();
+
+    std::cout << config_path << std::endl;
+
+    qcloud_cos::CosConfig config(config_path);
     qcloud_cos::CosAPI cos(config);
 
-    std::ifstream ifs(config_name.c_str(), std::ios::in);
+    std::ifstream ifs(config_path.c_str(), std::ios::in);
     Poco::JSON::Parser parser;
     Poco::JSON::Object::Ptr object = parser.parse(ifs).extract<Poco::JSON::Object::Ptr>();
 
