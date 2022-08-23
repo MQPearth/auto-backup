@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(auto-backup CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function")
+
+set(SYSTEM_LIBS stdc++ pthread)
+
+set(CMAKE_EXE_LINKER_FLAGS "-static")
+
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty/include")
+
+add_executable(${PROJECT_NAME} main.cc)
+
+find_library(SSL_LIB libssl.a REQUIRED)
+find_library(CRYPTO_LIB libcrypto.a REQUIRED)
+
+
+
+target_link_libraries(${PROJECT_NAME}
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/cos/libcossdk.a
+
+        -Wl,--start-group
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoNetSSL.a
+
+        ${SSL_LIB}
+        ${CRYPTO_LIB}
+        ${CMAKE_DL_LIBS}
+
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoCrypto.a
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoNet.a
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoJSON.a
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoFoundation.a
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoUtil.a
+        ${CMAKE_SOURCE_DIR}/thirdparty/lib/Poco/libPocoXML.a
+
+        -Wl,--end-group
+
+        ${SYSTEM_LIBS})
