@@ -12,6 +12,9 @@
 
 #define HELP_INFO "参数错误, 程序调用示例: \nauto-backup -p /usr/local/xxx/data/";
 
+
+std::string get_now_time_string();
+
 /**
  * 校验参数
  *
@@ -59,14 +62,19 @@ int main(int argc, char **argv) {
             std::cout << "[" << argv[2] << "]路径不存在或权限不足" << std::endl;
             return 0;
         }
+        std::cout << "----------------------------------------------------" << std::endl;
+        std::cout << "备份开始, 当前时间: " << get_now_time_string() << std::endl;
+
         std::string filename = zip(argv[2]);
 
-        upload(argv[0], filename);
-
-        deleteReduceFile(filename);
-
-        std::cout << "备份成功" << std::endl;
-
+        try {
+            upload(argv[0], filename);
+            deleteReduceFile(filename);
+            std::cout << "备份成功" << std::endl;
+        } catch (...) {
+            std::cout << "上传失败" << std::endl;
+            deleteReduceFile(filename);
+        }
         return 0;
 
     } catch (char const *&msg) {
@@ -136,8 +144,6 @@ void upload(char *_cmd_path, std::string filename) {
 
     std::string config_path = config_path_ss.str();
 
-    std::cout << config_path << std::endl;
-
     qcloud_cos::CosConfig config(config_path);
     qcloud_cos::CosAPI cos(config);
 
@@ -177,11 +183,28 @@ void upload(char *_cmd_path, std::string filename) {
 
 
 void deleteReduceFile(std::string file) {
-    std::ostringstream cmd_oss;
+    try {
+        std::ostringstream cmd_oss;
+        cmd_oss << "rm ";
+        cmd_oss << file;
+        system(cmd_oss.str().c_str());
+        std::cout << "本地压缩包清理完成" << std::endl;
+    } catch (...) {
+        std::cout << "本地压缩包清理失败" << std::endl;
+    }
 
-    cmd_oss << "rm ";
-    cmd_oss << file;
 
-    system(cmd_oss.str().c_str());
 }
 
+std::string get_now_time_string() {
+    auto now = std::chrono::system_clock::now();
+    auto ticks = std::chrono::system_clock::to_time_t(now);
+    auto local_time = localtime(&ticks);
+
+    std::ostringstream time_oss;
+
+    time_oss << std::put_time(local_time, "%F");
+    time_oss << std::put_time(local_time, "T%T");
+
+    return time_oss.str();
+}
