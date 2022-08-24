@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
             return 0;
         }
         std::cout << "----------------------------------------------------" << std::endl;
-        std::cout << "备份开始, 当前时间: " << get_now_time_string() << std::endl;
+        std::cout << "备份开始, 目标备份路径: " << argv[2] << ", 当前时间: " << get_now_time_string() << std::endl;
 
         std::string filename = zip(argv[2]);
 
